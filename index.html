@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Time Weather App by Chaitra</title>
+    <style>
+        /* Basic styling to make it look neat */
+        body {
+            font-family: Arial, sans-serif;
+            background: #4a90e2;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: rgba(0,0,0,0.3);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            width: 350px;
+        }
+        input {
+            padding: 10px;
+            width: 70%;
+            border: none;
+            border-radius: 5px;
+            outline: none;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background: white;
+            color: #4a90e2;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .weather-info {
+            margin-top: 20px;
+            display: none; /* hidden until we get data */
+        }
+        .weather-info img {
+            width: 70px;
+        }
+        .temp {
+            font-size: 40px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Real Time Weather App</h2>
+        
+        <div class="search">
+            <input type="text" id="cityInput" placeholder="Enter city name">
+            <button id="searchBtn">Search</button>
+        </div>
+
+        <div class="weather-information" id="weatherBox">
+            <h3 id="cityName"></h3>
+            <img id="weatherIcon" src="" alt="weather icon">
+            <div class="temp" id="temperature"></div>
+            <p id="description"></p>
+            <p>Humidity: <span id="humidity"></span>%</p>
+            <p>Wind: <span id="wind"></span> m/s</p>
+        </div>
+
+        <p id="errorMsg" style="color: red; display: none;">City not found</p>
+    </div>
+
+<script>
+    // 1. Put your API key here
+    const API_KEY = "5aeb4d32ea2f091f395cc436809eb60e"; 
+
+    const searchBtn = document.getElementById("searchBtn");
+    const cityInput = document.getElementById("cityInput");
+
+    // 2. When button is clicked, run getWeather function
+    searchBtn.addEventListener("click", getWeather);
+
+    function getWeather() {
+        const city = cityInput.value;
+        
+        // 3. This is the API url. We ask OpenWeather for data
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
+
+        // 4. fetch = ask the API for data
+        fetch(url)
+        .then(response => response.json()) // convert to readable data
+        .then(data => {
+            if(data.cod == "404") {
+                // If city not found
+                document.getElementById("errorMsg").style.display = "block";
+                document.getElementById("weatherBox").style.display = "none";
+            } else {
+                // 5. If city found, show data on screen
+                document.getElementById("errorMsg").style.display = "none";
+                document.getElementById("weatherBox").style.display = "block";
+
+                document.getElementById("cityName").innerText = data.name + ", " + data.sys.country;
+                document.getElementById("temperature").innerText = Math.round(data.main.temp) + "°C";
+                document.getElementById("description").innerText = data.weather[0].description;
+                document.getElementById("humidity").innerText = data.main.humidity;
+                document.getElementById("wind").innerText = data.wind.speed;
+                
+                // Show weather icon
+                const icon = data.weather[0].icon;
+                document.getElementById("weatherIcon").src = `https://openweathermap.org/img/wn/${icon}@2x.png`;
+            }
+        })
+        .catch(error => console.log(error));
+    }
+
+    // Load Bangalore weather when page opens
+    window.onload = function() {
+        cityInput.value = "Bangalore";
+        getWeather();
+    }
+</script>
+</body>
+</html>
